@@ -1,2 +1,4 @@
 # Dijkstra-algorithm
-Dijkstra's algorithm to find the shortest distance to all vertices in a graph.
+
+A tool for visualizing and calculating the shortest path between any two vertices in a graph using Dijkstra's shortest path algorithm.
+
