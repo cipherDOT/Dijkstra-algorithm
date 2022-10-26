@@ -3,6 +3,7 @@
 
 import pygame
 import math
+import rich
 
 pygame.font.init()
 font = pygame.font.SysFont("comicsans", 15)
@@ -23,7 +24,7 @@ class Color:
     light = (216, 222, 233)
     dark = (94, 129, 172)
 
-# ------------------------------------------------------ UTILS FUNCS ------------------------------------------------------ #
+# --------------------------------------------------- UTILS FUNCS ---------------------------------------------------- #
 
 def mapn(value, act_lower, act_upper, to_lower, to_upper):
     return to_lower + (to_upper - to_lower) * ((value - act_lower) / (act_upper - act_lower))
@@ -45,7 +46,7 @@ class Vertex:
         self.index = Vertex.vertex_index
         self.edges = []
 
-        # increment the clas variable "vertex_index"
+        # increment the class variable "vertex_index"
         Vertex.vertex_index += 1
 
     def draw(self, win):
@@ -83,7 +84,7 @@ class Edge:
 
 # ------------------------------------------------------ dijkstra ------------------------------------------------------ #
 
-def dijkstra(vertices, edges, start_ind, end_ind, lookup = [], past_distance = 0):
+def dijkstra(vertices, edges, start_ind, lookup = [], past_distance = 0, path = []):
     if lookup == []:
         for vertex in vertices:
             if vertex.index == start_ind:
@@ -93,13 +94,15 @@ def dijkstra(vertices, edges, start_ind, end_ind, lookup = [], past_distance = 0
 
             lookup.append(value)
 
-    print(lookup)
+    if path == []:
+        for vertex in vertices:
+            path.append([])
     
     try:
         current_vertex: Vertex = [v for v in vertices if v.index == start_ind][0]
         current_vertex.visited = True
-    except Exception as e:
-        print(f"Exception: {e}")
+    except IndexError:
+        rich.print(f"[red][DIJKSTRA][/red]: [bold italic]No vertices found![/bold italic]")
         return
 
     current_vertex_neighbors: list[Vertex] = []
@@ -108,32 +111,36 @@ def dijkstra(vertices, edges, start_ind, end_ind, lookup = [], past_distance = 0
             if not edge.other(current_vertex).visited:
                 current_vertex_neighbors.append((edge.other(current_vertex), edge.weight))
 
-    print()
-    print(f"Current vertex          : {current_vertex.index}")
-    print(f"Current vertex Neighbors: {[(v.index, w) for v, w in current_vertex_neighbors]}")
-
+    # BASE CONDITION
     if len(current_vertex_neighbors) == 0:
-        print(f"Completed: {lookup}")
-        return
+        if all([ew != math.inf for ew in lookup]):
+            print()
+            for ind, packed in enumerate(zip(path, lookup)):
+                route, distance = packed
+                route.append(ind)
+                rich.print(f"0 [i]to[/i] {ind} : {' ' * (3 - len(str(distance)))}{distance} : {' -> '.join([str(i) for i in route])}")
 
+            return
+        else:
+            print("Error")
+
+    # RECURSIVE CONDITION
     else:
         nearest_vertex_distance = math.inf
         nearest_vertex_index = None
         for vertex, edge_weight in current_vertex_neighbors:
 
-            # vertex seen for the first time
-            if lookup[vertex.index] == math.inf:
-                lookup[vertex.index] = edge_weight + past_distance
+            # updating the shortest distance to a vertex
+            if lookup[vertex.index] > edge_weight + past_distance:
+                lookup[vertex.index] = edge_weight + past_distance 
+                path[vertex.index].append(current_vertex.index)
 
-            else:
-                if lookup[vertex.index] > edge_weight + past_distance:
-                    lookup[vertex.index] = edge_weight + past_distance 
-
+            # finding the nearest vertex for the next round
             if lookup[vertex.index] < nearest_vertex_distance:
                 nearest_vertex_index = vertex.index
                 nearest_vertex_distance = lookup[vertex.index]
 
-        return dijkstra(vertices, edges, nearest_vertex_index, end_ind, lookup, nearest_vertex_distance)
+        return dijkstra(vertices, edges, nearest_vertex_index, lookup, nearest_vertex_distance, path)
 
 # ------------------------------------------------------ main func ------------------------------------------------------ #
 
@@ -178,8 +185,6 @@ def main():
                             # edge creation
                             new_edge = Edge(selected[0], selected[1], MAX_WEIGHT)
                             edges.append(new_edge)
-                            for vert in selected:
-                                vert.edges.append(new_edge)
 
                             selected = []
 
@@ -205,17 +210,23 @@ def main():
                         user_weight += pygame.key.name(event.key)
 
                 if event.key == pygame.K_d:
-                    dijkstra(verts, edges, 0, len(verts) - 1)
+                    start_ind = int(input("Enter the starting index: "))
+                    dijkstra(verts, edges, start_ind)
 
                 if event.key == pygame.K_BACKSPACE:
                     user_weight = ''
 
                 if event.key == pygame.K_DELETE:
+                    print()
                     if len(verts) > 0:
+                        last_vert = verts[-1]
+                        for edge in edges:
+                            if edge.includes(last_vert):
+                                edges.remove(edge)  
                         verts = verts[:-1]
                         Vertex.vertex_index -= 1
                     else:
-                        print("[DIJKSTRA] : No vertices to delete")
+                        rich.print("[red][DIJKSTRA][/red] : [blue]No vertices to delete[/blue]")
 
         if prompted:
             render_text("Weight: ", display, 0, 10)
