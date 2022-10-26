@@ -102,7 +102,7 @@ def dijkstra(vertices, edges, start_ind, lookup = [], past_distance = 0, path = 
         current_vertex: Vertex = [v for v in vertices if v.index == start_ind][0]
         current_vertex.visited = True
     except IndexError:
-        rich.print(f"[red][DIJKSTRA][/red]: [bold italic]No vertices found![/bold italic]")
+        rich.print(f"[bold red]ERROR[/bold red]: [bold blue]Unresolved logic error[/bold blue]")
         return
 
     current_vertex_neighbors: list[Vertex] = []
@@ -122,7 +122,7 @@ def dijkstra(vertices, edges, start_ind, lookup = [], past_distance = 0, path = 
 
             return
         else:
-            print("Error")
+            rich.print(f"[bold red]ERROR[/bold red]: [bold blue]Unresolved logic error[/bold blue]")
 
     # RECURSIVE CONDITION
     else:
@@ -159,7 +159,7 @@ def main():
                 run = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:                # left mouse button          
+                if event.button == 1:                                                       # left mouse button          
                     if not prompted:    
                         # vertx creation
                         x, y = pygame.mouse.get_pos()
@@ -168,7 +168,7 @@ def main():
                     else:
                         print("Enter a valid input")
 
-                elif event.button == 3:              # right mouse button
+                elif event.button == 3:                                                     # right mouse button
                     if len(verts) >= 2:
                         pos = pygame.mouse.get_pos()
                         short_dist = math.inf
@@ -182,14 +182,10 @@ def main():
                         selected.append(nearest_vert)
 
                         if len(selected) >= 2:
-                            # edge creation
-                            new_edge = Edge(selected[0], selected[1], MAX_WEIGHT)
+                            new_edge = Edge(selected[0], selected[1], MAX_WEIGHT)           # edge creation
                             edges.append(new_edge)
-
                             selected = []
-
-                            # prompt the user for edge weight after edge creation
-                            prompted = True
+                            prompted = True                                                 # prompt the user for edge weight after edge creation
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_e:
@@ -210,14 +206,17 @@ def main():
                         user_weight += pygame.key.name(event.key)
 
                 if event.key == pygame.K_d:
-                    start_ind = int(input("Enter the starting index: "))
-                    dijkstra(verts, edges, start_ind)
+                    if len(verts) != 0:
+                        start_ind = int(input("Enter the starting index: "))
+                        dijkstra(verts, edges, start_ind)
+                    else:
+                        rich.print("[bold red]ERROR[/bold red] : [bold blue]No graph found[/bold blue]")
+
 
                 if event.key == pygame.K_BACKSPACE:
                     user_weight = ''
 
                 if event.key == pygame.K_DELETE:
-                    print()
                     if len(verts) > 0:
                         last_vert = verts[-1]
                         for edge in edges:
@@ -226,7 +225,7 @@ def main():
                         verts = verts[:-1]
                         Vertex.vertex_index -= 1
                     else:
-                        rich.print("[red][DIJKSTRA][/red] : [blue]No vertices to delete[/blue]")
+                        rich.print("[bold red]ERROR[/bold red] : [bold blue]No vertices to delete[/bold blue]")
 
         if prompted:
             render_text("Weight: ", display, 0, 10)
