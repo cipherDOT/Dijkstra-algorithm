@@ -8,7 +8,7 @@ import rich
 pygame.font.init()
 font = pygame.font.SysFont("comicsans", 15)
 
-# ------------------------------------------------------ constants ------------------------------------------------------ #
+# ------------------------------------------------------ constants ---------------------------------------------------- #
 
 width = 500
 height = 500
@@ -17,7 +17,7 @@ MAX_WEIGHT = 100
 display = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Dijkstra's algorithm")
 
-# ------------------------------------------------------ COLOR ------------------------------------------------------ #
+# ------------------------------------------------------ COLOR ------------------------------------------------------- #
 
 class Color:
     bg = (46, 52, 64)
@@ -82,7 +82,7 @@ class Edge:
         if self.weight != None:
             render_text(str(self.weight), win, (self.vertA.x + self.vertB.x) // 2, (self.vertA.y + self.vertB.y) // 2)
 
-# ------------------------------------------------------ dijkstra ------------------------------------------------------ #
+# ---------------------------------------------------- dijkstra ---------------------------------------------------- #
 
 def dijkstra(vertices, edges, start_ind, lookup = [], past_distance = 0, path = []):
     if lookup == []:
@@ -97,7 +97,7 @@ def dijkstra(vertices, edges, start_ind, lookup = [], past_distance = 0, path = 
     if path == []:
         for vertex in vertices:
             path.append([])
-    
+
     try:
         current_vertex: Vertex = [v for v in vertices if v.index == start_ind][0]
         current_vertex.visited = True
@@ -142,7 +142,7 @@ def dijkstra(vertices, edges, start_ind, lookup = [], past_distance = 0, path = 
 
         return dijkstra(vertices, edges, nearest_vertex_index, lookup, nearest_vertex_distance, path)
 
-# ------------------------------------------------------ main func ------------------------------------------------------ #
+# ----------------------------------------------------- main func ---------------------------------------------------- #
 
 def main():
     run = True
